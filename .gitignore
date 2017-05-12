@@ -14,3 +14,7 @@ project/plugins/project/
 
 # Serverless directories
 .serverless
+
+# ensime files
+/.ensime
+/.ensime_cache/*

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+./sbt clean
+./sbt assembly
+
+if [ -f .serverless/lambda-geotrellis-tile-server.zip ]; then
+    rm .serverless/lambda-geotrellis-tile-server.zip
+fi
+serverless deploy

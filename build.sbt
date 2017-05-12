@@ -31,12 +31,12 @@ lazy val commonSettings = Seq(
 
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-lambda-java-core" % "1.1.0",
-  "com.amazonaws" % "aws-lambda-java-events" % "1.3.0",
-  "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+  "com.amazonaws" % "aws-lambda-java-core" % "1.1.0" % "provided",
+  "com.amazonaws" % "aws-lambda-java-events" % "1.3.0" % "provided",
+  "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0" % "provided",
+  "commons-io" % "commons-io" % "2.4",
   Dependencies.geotrellisS3,
   Dependencies.geotrellisRaster,
-  Dependencies.geotrellisVector,
   Dependencies.geotrellisSpark
 )
 
@@ -70,3 +70,11 @@ mappings in upload := Seq((file(s"target/scala-2.11/${name.value}.jar"), s"${nam
 host in upload := "lambda-geotrellis-tile-server-jar.s3.amazonaws.com"
 progress in upload := true
 upload <<= upload dependsOn assembly
+
+initialCommands in console := """
+  |import io.circe.optics._
+  |import io.circe.parser._
+  |import io.circe.syntax._
+  |import geotrellis.spark.io._
+  |import geotrellis.spark.io.s3._
+""".trim.stripMargin
