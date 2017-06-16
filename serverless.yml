@@ -16,11 +16,11 @@ package:
   artifact: target/scala-2.11/lambda-geotrellis-tile-server.jar
 
 functions:
-  emptyTile:
+  getTile:
     handler: io.github.jisantuc.gtlambda.lambda.TileRequestHandler
     events:
       - http:
-          path: tile/empty/{z}/{x}/{y}/
+          path: tile/{s}/{z}/{x}/{y}/
           method: get
           response:
             headers:
@@ -29,11 +29,12 @@ functions:
           cors: true
           request:
             template:
-              application/json: '{ "x": "$input.params(''x'')", "y": "$input.params(''y'')", "z": "$input.params(''z'')" }'
+              application/json: '{ "x": "$input.params(''x'')", "y": "$input.params(''y'')", "z": "$input.params(''z'')", "s": "$input.params(''s'')" }'
             parameters:
               paths:
                 z: 0
                 y: 0
                 x: 0
+                s: nlcd
             headers:
               Content-Type: application/json
