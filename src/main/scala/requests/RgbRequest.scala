@@ -5,9 +5,12 @@ import geotrellis.raster.render.{ColorRamps, ColorMap}
 import geotrellis.spark.{LayerId, SpatialKey}
 import geotrellis.spark.io.ValueNotFoundError
 import geotrellis.spark.io.s3.{S3ValueReader, S3AttributeStore}
+import geotrellis.spark.io.avro._
 
+import com.amazonaws.services.lambda.runtime.LambdaLogger
 import io.circe.generic.JsonCodec
 
+import java.net.URLDecoder
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -16,26 +19,35 @@ case class RgbRequest (
   x: Int,
   y: Int,
   z: Int,
-  s: String
+  bucket: String,
+  prefix: String,
+  layerName: String,
+  vizType: String
 ) extends Request {
   implicit val spatialKeyFormat = jsonFormat2(SpatialKey.apply _)
 
-  val source = s match {
-    case "nlcd" => "nlcd-2011-canopy-tms-epsg3857"
-    case "ned" => "us-ned-tms-epsg3857"
-    case _ => throw new RuntimeException(s"Unknown layer: $s")
-  }
-
-  def toTile: Tile = {
-    val store = S3AttributeStore("azavea-datahub", "catalog")
-    val layerId = new LayerId(source, z)
-    val reader = new S3ValueReader(store).reader[SpatialKey, Tile](layerId)
+  private def fetchValue[T: AvroRecordCodec](default: => T)(implicit logger: LambdaLogger) = {
+    val p = URLDecoder.decode(prefix)
+    val store = S3AttributeStore(bucket, p)
+    val layerId = new LayerId(layerName, z)
+    val reader = new S3ValueReader(store).reader[SpatialKey, T](layerId)
     try {
       reader.read(SpatialKey(x, y))
     } catch {
-      case e: ValueNotFoundError => IntArrayTile.ofDim(256, 256)
+      case e: ValueNotFoundError =>
+        logger.log(s"Empty tile: ${bucket} ${p} ${layerName} ${e}")
+        default
     }
   }
+
+  def toTile(implicit logger: LambdaLogger): Tile =
+    fetchValue { IntArrayTile.ofDim(256, 256) }
+
+  def toMultibandTile(implicit logger: LambdaLogger): MultibandTile =
+    fetchValue {
+      val t = toTile
+      MultibandTile(t, t, t)
+    }
 }
 
 @JsonCodec
@@ -45,5 +57,9 @@ case class EmptyRequest (
   z: Int
 ) extends Request {
   val fill = scala.util.Random.nextInt(255)
-  def toTile = IntArrayTile.ofDim(256, 256).map { x => fill }
+  def toTile(implicit logger: LambdaLogger) = IntArrayTile.ofDim(256, 256).map { x => fill }
+  def toMultibandTile(implicit logger: LambdaLogger) = {
+    val t = toTile
+    MultibandTile(t, t, t)
+  }
 }

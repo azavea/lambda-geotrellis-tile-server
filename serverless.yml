@@ -1,8 +1,10 @@
-service: lambda-geotrellis-tile-server
+service: lambda-tile-server
 
 provider:
   name: aws
   runtime: java8
+  timeout: 30
+  memorySize: 512
 
 # you can overwrite defaults here
 #  stage: dev
@@ -20,7 +22,7 @@ functions:
     handler: io.github.jisantuc.gtlambda.lambda.TileRequestHandler
     events:
       - http:
-          path: tile/{s}/{z}/{x}/{y}/
+          path: tile/{b}/{p}/{l}/{v}/{z}/{x}/{y}/
           method: get
           response:
             headers:
@@ -29,12 +31,15 @@ functions:
           cors: true
           request:
             template:
-              application/json: '{ "x": "$input.params(''x'')", "y": "$input.params(''y'')", "z": "$input.params(''z'')", "s": "$input.params(''s'')" }'
+              application/json: '{ "x": "$input.params(''x'')", "y": "$input.params(''y'')", "z": "$input.params(''z'')", "bucket": "$input.params(''b'')", "prefix": "$input.params(''p'')", "layerName": "$input.params(''l'')", "vizType": "$input.params(''v'')" }'
             parameters:
               paths:
                 z: 0
                 y: 0
                 x: 0
-                s: nlcd
+                b: none
+                p: none
+                l: none
+                v: viridis
             headers:
               Content-Type: application/json
