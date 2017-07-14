@@ -5,7 +5,6 @@ import io.github.jisantuc.gtlambda.tile._
 import com.amazonaws.services.lambda.runtime.{Context, RequestStreamHandler, LambdaLogger}
 import geotrellis.raster.render.ColorMap
 import io.circe.Json
-import io.circe.optics.JsonPath._
 import io.circe.parser.{parse, decode}
 
 import java.io.{InputStream, ByteArrayOutputStream, OutputStream}
