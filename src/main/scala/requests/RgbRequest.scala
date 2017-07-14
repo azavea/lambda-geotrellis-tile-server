@@ -15,7 +15,7 @@ import spray.json._
 import DefaultJsonProtocol._
 
 @JsonCodec
-case class RgbRequest (
+case class DefaultRequest (
   x: Int,
   y: Int,
   z: Int,
@@ -28,23 +28,24 @@ case class RgbRequest (
 
   private def fetchValue[T: AvroRecordCodec](default: => T)(implicit logger: LambdaLogger) = {
     val p = URLDecoder.decode(prefix)
+    val l = URLDecoder.decode(layerName)
     val store = S3AttributeStore(bucket, p)
-    val layerId = new LayerId(layerName, z)
+    val layerId = new LayerId(l, z)
     val reader = new S3ValueReader(store).reader[SpatialKey, T](layerId)
     try {
       reader.read(SpatialKey(x, y))
     } catch {
       case e: ValueNotFoundError =>
-        logger.log(s"Empty tile: ${bucket} ${p} ${layerName} ${e}")
+        logger.log(s"Empty tile: ${bucket} ${p} ${l} ${e}")
         default
     }
   }
 
   def toTile(implicit logger: LambdaLogger): Tile =
-    fetchValue { IntArrayTile.ofDim(256, 256) }
+    fetchValue[Tile] { IntArrayTile.ofDim(256, 256) }
 
   def toMultibandTile(implicit logger: LambdaLogger): MultibandTile =
-    fetchValue {
+    fetchValue[MultibandTile] {
       val t = toTile
       MultibandTile(t, t, t)
     }
