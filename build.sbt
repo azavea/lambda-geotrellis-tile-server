@@ -31,24 +31,16 @@ lazy val commonSettings = Seq(
 
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-lambda-java-core" % "1.1.0" % "provided",
-  "com.amazonaws" % "aws-lambda-java-events" % "1.3.0" % "provided",
-  "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0" % "provided",
-  "commons-io" % "commons-io" % "2.4",
+  Dependencies.awsJavaCore,
+  Dependencies.awsJavaEvents,
+  Dependencies.awsJavaLog4j,
+  Dependencies.commonsIo,
   Dependencies.geotrellisS3,
   Dependencies.geotrellisRaster,
-  Dependencies.geotrellisSpark
-)
-
-val circeVersion = "0.7.0"
-libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core",
-  "io.circe" %% "circe-generic",
-  "io.circe" %% "circe-parser",
-  "io.circe" %% "circe-optics"
-).map(_ % circeVersion)
-
-lazy val lambdaDependencies = Seq(
+  Dependencies.geotrellisSpark,
+  Dependencies.circeCore,
+  Dependencies.circeGeneric,
+  Dependencies.circeParser
 )
 
 lazy val root = Project("root", file("."))
@@ -72,7 +64,6 @@ progress in upload := true
 upload <<= upload dependsOn assembly
 
 initialCommands in console := """
-  |import io.circe.optics._
   |import io.circe.parser._
   |import io.circe.syntax._
   |import geotrellis.spark.io._
