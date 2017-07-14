@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import argparse
+import json
+import yaml
+
+
+SERVERLESS_OUT='serverless.yml'
+
+
+def load_passthrough_template(inf):
+    with open(inf, 'r') as passthrough_tpl:
+        return json.load(passthrough_tpl)
+
+
+def load_serverless_template(inf):
+    with open(inf, 'r') as serverless_tpl:
+        return yaml.load(serverless_tpl)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--serverless_template', '-s', default='serverless.yml.tpl')
+    parser.add_argument('--passthrough_template', '-p', default='templates/passthrough.json')
+    parser.add_argument('--function_name', '-f', default='getTile')
+    cli = parser.parse_args()
+
+    pt_tpl = load_passthrough_template(cli.passthrough_template)
+    serverless_tpl = load_serverless_template(cli.serverless_template)
+
+    func = serverless_tpl['functions'][cli.function_name]
+    func['events'][0]['http']['request']['template']['application/json'] = (
+        '{}'.format(json.dumps(pt_tpl[cli.function_name]))
+    )
+    with open(SERVERLESS_OUT, 'w') as outf:
+        outf.write(yaml.dump(serverless_tpl))
+
+
+if __name__ == '__main__':
+    main()

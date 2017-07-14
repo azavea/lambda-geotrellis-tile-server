@@ -2,10 +2,26 @@
 
 set -e
 
+while getopts s:p:f: option
+do
+    case "${option}" in
+        s) SERVERLESS_TPL="${OPTARG}";;
+        p) PASSTHROUGH_TPL="${OPTARG}";;
+        f) FUNC_NAME="${OPTARG}";;
+    esac
+done
+
+./scripts/build-serverless -s "${SERVERLESS_TPL}" \
+                           -p "${PASSTHROUGH_TPL}" \
+                           -f "${FUNC_NAME}"
+
 ./sbt clean
 ./sbt assembly
 
 if [ -f .serverless/lambda-geotrellis-tile-server.zip ]; then
     rm .serverless/lambda-geotrellis-tile-server.zip
 fi
+
 serverless deploy
+
+rm serverless.yml
