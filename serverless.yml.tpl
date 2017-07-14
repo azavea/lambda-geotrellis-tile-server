@@ -31,7 +31,7 @@ functions:
           cors: true
           request:
             template:
-              application/json: '{ "x": "$input.params(''x'')", "y": "$input.params(''y'')", "z": "$input.params(''z'')", "bucket": "$input.params(''b'')", "prefix": "$input.params(''p'')", "layerName": "$input.params(''l'')", "vizType": "$input.params(''v'')" }'
+              application/json: '{ }'
             parameters:
               paths:
                 z: 0

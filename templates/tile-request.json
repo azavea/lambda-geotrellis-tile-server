@@ -1,5 +1,0 @@
-{
-    "x": "$input.params(''x'')",
-    "y": "$input.params(''y'')",
-    "z": "$input.params(''z'')"
-}
