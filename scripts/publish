@@ -11,9 +11,9 @@ do
     esac
 done
 
-./scripts/build-serverless -s "${SERVERLESS_TPL}" \
-                           -p "${PASSTHROUGH_TPL}" \
-                           -f "${FUNC_NAME}"
+./scripts/build-serverless -s "${SERVERLESS_TPL:-serverless.yml.tpl}" \
+                           -p "${PASSTHROUGH_TPL:-templates/passthrough.json}" \
+                           -f "${FUNC_NAME:-getTile}"
 
 ./sbt clean
 ./sbt assembly
