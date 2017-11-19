@@ -59,10 +59,16 @@ You'll need the following AWS permissions:
   - cloudformation:*
   - lambda:*
   - apigateway:*
+  - iam:*
+  - logs:*
+  - s3:*
+
+A more minimal set of permissions is possible, but I haven't mapped out the extent of permissions
+requried in each domain. The above will _definitely_ work.
 
 Once that's set up for your user:
 
-- Configure your AWS profile
+- Configure your AWS profile (`aws configure --profile <profile name>`)
 - `npm install -g serverless`
 - `./scripts/publish`
 - Configure your API gateway endpoint from the AWS console:
